@@ -1,3 +1,6 @@
+var Botkit = require('botkit')
+var Witbot = require('witbot')
+
 var Slack = require('slack-client')
 
 // Expect a SLACK_TOKEN environment variable
@@ -7,51 +10,51 @@ if (!slackToken) {
   process.exit(1)
 }
 
-// Create a new Slack client with our token
-var slack = new Slack(slackToken, true, true)
+// Add A Wit.ai token
+var witToken = process.env.WIT_TOKEN
+var openWeatherApiKey = process.env.OPENWEATHER_KEY
 
-// bot will be initialized when logged in
-var bot
-
-// handle loggedIn event
-slack.on('loggedIn', function (user, team) {
-  bot = user
-  console.log('I am ' + user.name + ' of team ' + team.name)
+var controller = Botkit.slackbot({
+  debug: false
 })
 
-// show status when we conntect
-slack.on('open', function () {
-  console.log('Connected')
+controller.spawn({
+  token: slackToken
+}).startRTM(function (err, bot, payload) {
+  if (err) {
+    throw new Error('Error connecting to Slack: ', err)
+  }
+  console.log('Connected to Slack')
 })
 
-// register a handler for messages
-slack.on('message', function (message) {
-  if (isMe(message, bot.id)) return
-  if (!isMentioned(message, bot.id) && !isDM(message, bot.id)) return
+var witbot = Witbot(witToken)
 
-  console.log('Received message ' + message)
-
-  // We recieved a message that wasn't from us and either mentioned us or was a DM to us
-  // Let's ust say hi
-  var channel = slack.getChannelGroupOrDMByID(message.channel)
-  channel.send('Good day to you from https://beepboophq.com!')
+controller.hears('.*', 'direct_message,direct_mention', function(bot, message) {
+  witbot.process(message.text, bot, message)
 })
 
-// initiate login
-slack.login()
+witbot.hears('hello', 0.5, function(bot, message, outcome) {
+  bot.reply(message, 'Hello to you as well!')
+})
 
-// ----------------------------------------------------------------------------
-// Utilities
-// ----------------------------------------------------------------------------
+// add a second 'hears' for the 'how_are_you' intent below
 
-function isMentioned (message, userId) {
-  return message.text.indexOf('<@' + userId) >= 0
-}
+var weather = require('./weather')(openWeatherApiKey)
 
-function isMe (message, userId) {
-  return message.user === userId
-}
+witbot.hears('weather', 0.5, function(bot, message, outcome) {
+  console.log(outcome.entities.location)
+  if (!outcome.entities.location || outcome.entities.location.length === 0) {
+    bot.reply(message, 'I\'d love to give you the weather but for where?')
+    return
+  }
 
-function isDM (message, userId) {
-  return message.channel[0] === 'D'
-}
+  var location = outcome.entities.location[0].value
+  weather.get(location, function(error, msg) {
+    if (error) {
+      console.error(error)
+      bot.reply(message, 'uh oh! There was a problem getting the weather')
+      return
+    }
+    bot.reply(message, msg)
+  })
+})
