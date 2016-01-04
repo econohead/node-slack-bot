@@ -41,6 +41,7 @@ witbot.hears('hello', 0.5, function(bot, message, outcome) {
 
 var weather = require('./weather')(openWeatherApiKey)
 
+// add in prompt for simple 'how's the weather' conversation
 witbot.hears('weather', 0.5, function(bot, message, outcome) {
   console.log(outcome.entities.location)
   if (!outcome.entities.location || outcome.entities.location.length === 0) {
