@@ -38,6 +38,9 @@ witbot.hears('hello', 0.5, function(bot, message, outcome) {
 })
 
 // add a second 'hears' for the 'how_are_you' intent below
+witbot.hears('how_are_you', 0.5, function(bot, message, outcome) {
+  bot.reply(message, 'Doing great! Thanks for asking.')
+})
 
 var weather = require('./weather')(openWeatherApiKey)
 
