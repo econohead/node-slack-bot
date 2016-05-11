@@ -7,7 +7,6 @@ module.exports = function (token) {
 function Untappd (token) {
 	var self = this
 	self.token = token
-//https://api.untappd.com/v4/search/beer?q=Street&Green&access_token=9D396B8FD965B7B098921661ABBF39F8E92CFB16
 	self.get = function (beer, fn) {
 		var url = 'https://api.untappd.com/v4/search/beer?q=' + beer + 
 		'&access_token=' + self.token
