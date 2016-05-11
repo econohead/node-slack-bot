@@ -1,5 +1,5 @@
 var Botkit = require('botkit')
-var Witbot = require('../')
+var Witbot = require('witbot')
 var UntappdClient = require('node-untappd'); //ok from node_modules
 var Slack = require('slack-client')
 
@@ -11,8 +11,7 @@ if (!slackToken) {
 }
 
 // Add Tokens and Keys
-var witbot = Witbot(process.env.WIT_TOKEN)
-//var witToken = process.env.WIT_TOKEN
+var witToken = process.env.WIT_TOKEN
 var untappdToken = process.env.UNTAPPD_TOKEN          //ok from bot.yml
 var openWeatherApiKey = process.env.OPENWEATHER_KEY
 
@@ -29,7 +28,7 @@ controller.spawn({
   console.log('Connected to Slack')
 })
 var debug = false
-//var witbot = Witbot(witToken)
+var witbot = Witbot(witToken)
 var untappd = UntappdClient(untappdToken);
 
 //might need to be 'var node-untappd = Untappd(untappdToken)'
