@@ -1,6 +1,6 @@
 var Botkit = require('botkit')
 var Witbot = require('witbot')
-
+var UntappdClient = require('node-untappd'); //ok from node_modules
 var Slack = require('slack-client')
 
 // Expect a SLACK_TOKEN environment variable
@@ -10,8 +10,9 @@ if (!slackToken) {
   process.exit(1)
 }
 
-// Add A Wit.ai token
+// Add Tokens and Keys
 var witToken = process.env.WIT_TOKEN
+var untappdToken = process.env.UNTAPPD_TOKEN          //ok from bot.yml
 var openWeatherApiKey = process.env.OPENWEATHER_KEY
 
 var controller = Botkit.slackbot({
@@ -26,8 +27,14 @@ controller.spawn({
   }
   console.log('Connected to Slack')
 })
-
+var debug = false
 var witbot = Witbot(witToken)
+var untappd = UntappdClient(untappdToken);
+
+//might need to be 'var node-untappd = Untappd(untappdToken)'
+//var untappd = Untappd(untappdToken)
+// 13/1 - I think below needs to take the parameter 'untappdToken'
+
 
 controller.hears('.*', 'direct_message,direct_mention', function(bot, message) {
   witbot.process(message.text, bot, message)
@@ -37,6 +44,20 @@ witbot.hears('hello', 0.5, function(bot, message, outcome) {
   bot.reply(message, 'Hello to you as well!')
 })
 
+/* This works as a conversation too - 'bot.startConversation' function from botkit
+witbot.hears(['hello'], 0.5, function(bot, message, outcome) {
+
+  // start a conversation to handle this response.
+  bot.startConversation(message,function(err,convo) {
+
+    convo.say('Hello!');
+    convo.say('Have a nice day!');
+
+  })
+
+});
+*/
+
 // add a second 'hears' for the 'how_are_you' intent below
 witbot.hears('how_are_you', 0.5, function(bot, message, outcome) {
   bot.reply(message, 'Doing great! Thanks for asking.')
@@ -44,7 +65,7 @@ witbot.hears('how_are_you', 0.5, function(bot, message, outcome) {
 
 var weather = require('./weather')(openWeatherApiKey)
 
-// add in prompt for simple 'how's the weather' conversation
+// hears weather
 witbot.hears('weather', 0.5, function(bot, message, outcome) {
   console.log(outcome.entities.location)
   if (!outcome.entities.location || outcome.entities.location.length === 0) {
@@ -53,12 +74,42 @@ witbot.hears('weather', 0.5, function(bot, message, outcome) {
   }
 
   var location = outcome.entities.location[0].value
+
   weather.get(location, function(error, msg) {
     if (error) {
       console.error(error)
       bot.reply(message, 'uh oh! There was a problem getting the weather')
       return
     }
+    bot.reply(message,"wait for it...")
     bot.reply(message, msg)
   })
+})
+
+var untappd = require('./untappd')(untappdToken)
+
+// hears beer
+witbot.hears('beer', 0.5, function(bot, message, outcome) {
+  console.log(outcome.entities.beer)                                      // search term
+  if (!outcome.entities.beer || outcome.entities.beer.length === 0) {     // this should be a JSON search results response 
+    bot.reply(message, 'I\'d love to find you that beer but which one?')
+    return
+  }
+
+  var beer = outcome.entities.beer[0].value
+  console.log(beer)
+
+  untappd.get(beer, function(error, msg) {
+    if (error) {
+      console.error(error)
+      bot.reply(message, 'uh oh! There was a problem getting that brew')
+      return
+    }
+    console.log("here comes your beer...")
+    console.log(msg.attachments[0].pretext)
+    //console.log(msg.attachments.pretext)
+    //console.log(msg.attachments[0].fallback)
+    bot.reply(message, msg)
+  })
+
 })
