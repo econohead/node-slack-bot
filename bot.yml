@@ -6,7 +6,8 @@ config:
     friendly_name: The Open Weather API Key
     info: Get this key from openweathermap.org
     type: secret
-    default: pasteHere
+    default: not secret though
+    global: true
   - name: WIT_TOKEN
     friendly_name: The Wit.ai API Token
     info: Get this from wit.ai
