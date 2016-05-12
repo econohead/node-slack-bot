@@ -11,7 +11,9 @@ config:
     friendly_name: The Wit.ai API Token
     info: Get this from wit.ai
     type: secret
+    global: true
   - name: UNTAPPD_TOKEN
     friendly_name: The Untappd API Token
     info: Get this from untappd.com
     type: secret
+    global: true
