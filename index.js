@@ -27,6 +27,7 @@ controller.spawn({
   }
   console.log('Connected to Slack')
 })
+
 var debug = false
 var witbot = Witbot(witToken)
 var untappd = UntappdClient(untappdToken);
