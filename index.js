@@ -1,3 +1,13 @@
+/*
+ *
+ * Description here
+ * Node-slack-bot
+ * Created  : Mat
+ * Date   : 9/7/16
+ * Updated  :  
+ * Notes  : 'client_secret' is the "token"??? just like weather.js
+ */
+
 var Botkit = require('botkit')
 var Witbot = require('witbot')
 var UntappdClient = require('node-untappd'); //ok from node_modules
@@ -14,6 +24,7 @@ if (!slackToken) {
 var witToken = process.env.WIT_TOKEN
 var untappdToken = process.env.UNTAPPD_TOKEN          //ok from bot.yml
 var openWeatherApiKey = process.env.OPENWEATHER_KEY
+var asiApiKey = process.env.ASI_KEY
 
 var controller = Botkit.slackbot({
   debug: false
@@ -27,6 +38,7 @@ controller.spawn({
   }
   console.log('Connected to Slack')
 })
+
 
 var debug = false
 var witbot = Witbot(witToken)
@@ -61,7 +73,8 @@ witbot.hears(['hello'], 0.5, function(bot, message, outcome) {
 
 // add a second 'hears' for the 'how_are_you' intent below
 witbot.hears('how_are_you', 0.5, function(bot, message, outcome) {
-  bot.reply(message, 'Doing great! Thanks for asking.')
+  bot.reply(message, 'Doing great! Thanks for asking.'),
+  console.log("Doing great! Thanks for asking.")
 })
 
 var weather = require('./weather')(openWeatherApiKey)
@@ -110,6 +123,7 @@ witbot.hears('beer', 0.5, function(bot, message, outcome) {
     console.log(msg.attachments[0].pretext)
     //console.log(msg.attachments.pretext)
     //console.log(msg.attachments[0].fallback)
+    bot.reply(message, 'Nice one!  Check it out.')
     bot.reply(message, msg)
   })
 
