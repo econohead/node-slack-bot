@@ -95,7 +95,7 @@ witbot.hears('weather', 0.5, function(bot, message, outcome) {
       bot.reply(message, 'uh oh! There was a problem getting the weather')
       return
     }
-    bot.reply(message,"wait for it...")
+    bot.reply(message,"Wait for it... Here you are. Enjoy!")
     bot.reply(message, msg)
   })
 })
